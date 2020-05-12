@@ -1,10 +1,10 @@
-import 'package:fdchat/ChatMessagesList.dart';
-import 'package:fdchat/ChatsList.dart';
-import 'package:fdchat/UserProfile.dart';
+import 'package:fdchat/chatMessagesList.dart';
+import 'package:fdchat/chatsList.dart';
+import 'package:fdchat/userProfile.dart';
 import 'package:flutter/material.dart';
 
-import 'MainPage.dart';
-import 'SignUpPage.dart';
+import 'mainPage.dart';
+import 'authorization/signUpPage.dart';
 
 void main() {
   runApp(MyApp());

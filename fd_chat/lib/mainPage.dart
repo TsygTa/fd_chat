@@ -1,5 +1,5 @@
-import 'package:fdchat/ChatsList.dart';
-import 'package:fdchat/UserProfile.dart';
+import 'package:fdchat/chatsList.dart';
+import 'package:fdchat/userProfile.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {
