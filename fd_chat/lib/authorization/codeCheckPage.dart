@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'MainPage.dart';
-import 'main.dart';
+import '../mainPage.dart';
+import '../main.dart';
 
 class CodeCheckPage extends StatefulWidget {
   CodeCheckPage({Key key}) : super(key: key);
