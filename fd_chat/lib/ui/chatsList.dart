@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fdchat/chatMessagesList.dart';
-import 'package:fdchat/repository/dataRepository.dart';
+import 'package:fdchat/models/user.dart';
+import 'package:fdchat/ui/chatMessagesList.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'addChatDialog.dart';
-import 'models/chat.dart';
+import '../main.dart';
+import '../models/chat.dart';
 
 class ChatsList extends StatefulWidget {
   ChatsList({Key key}) : super(key: key);
@@ -15,12 +16,23 @@ class ChatsList extends StatefulWidget {
 
 class _ChatsListState extends State<ChatsList> {
 
-  final DataRepository dataRepository = DataRepository();
-  final dateFormat = DateFormat('dd-MM-yyyy');
+  final dateFormat = DateFormat('hh:mm dd-MM-yyyy');
+  User user;
+
+  Future<dynamic> _getUserProfile() async {
+    final DocumentReference document = dataRepository.getUser(currentUserId);
+
+    await document.get().then<dynamic>(( DocumentSnapshot snapshot) async{
+      setState(() {
+        user = User.fromSnapshot(snapshot);
+      });
+    });
+  }
 
   @override
   void initState() {
-
+    super.initState();
+    _getUserProfile();
   }
 
   @override
@@ -65,7 +77,6 @@ class _ChatsListState extends State<ChatsList> {
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Icon(Icons.insert_emoticon, size: 36,),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -112,6 +123,7 @@ class _ChatsListState extends State<ChatsList> {
                     onPressed: () {
                       List<DocumentReference> users = List<DocumentReference>();
                       users.add(dialogWidget.userReference);
+                      users.add(user.reference);
                       Chat chat = Chat(dialogWidget.chatName, users: users);
                       dataRepository.addChat(chat);
                       Navigator.of(context).pop();

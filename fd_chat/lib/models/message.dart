@@ -4,11 +4,11 @@ class Message {
   String text;
   DateTime time;
   String userName;
-  bool isMy;
+  String userId;
 
   DocumentReference reference;
 
-  Message(this.text, {this.time, this.userName, this.isMy, this.reference});
+  Message(this.text, {this.time, this.userName, this.userId, this.reference});
 
   factory Message.fromSnapshot(DocumentSnapshot snapshot) {
     Message message = Message.fromJson(snapshot.data);
@@ -24,7 +24,7 @@ Message _MessageFromJson(Map<String, dynamic> json) {
     json['text'] as String,
     time: json['time'] == null ? null : (json['time'] as Timestamp).toDate(),
     userName: json['user_name'] as String,
-    isMy: json['is_my'] as bool
+    userId: json['user_id'] as String
   );
 }
 
@@ -32,5 +32,5 @@ Map<String, dynamic> _MessageToJson(Message instance) => <String, dynamic> {
   'text': instance.text,
   'time': instance.time,
   'user_name': instance.userName,
-  'is_my': instance.isMy
+  'user_id': instance.userId
 };

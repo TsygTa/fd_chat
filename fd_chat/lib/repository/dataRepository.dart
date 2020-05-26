@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fdchat/models/chat.dart';
 import 'package:fdchat/models/message.dart';
+import 'package:fdchat/models/user.dart';
+
+import '../main.dart';
 
 class DataRepository {
   final CollectionReference chatsCollection = Firestore.instance.collection('chats');
@@ -10,8 +13,16 @@ class DataRepository {
     return chatsCollection.snapshots();
   }
 
+  void updateChat(Chat chat) {
+    chatsCollection.document(chat.reference.documentID).updateData(chat.toJson());
+  }
+
   Stream<QuerySnapshot> getUsers() {
     return usersCollection.snapshots();
+  }
+
+  DocumentReference getUser(String id) {
+    return usersCollection.document(id);
   }
 
   Stream<QuerySnapshot> getMessages(DocumentReference chatReference) {
@@ -27,5 +38,14 @@ class DataRepository {
       Message message) {
     chatsCollection.document(chatReference.documentID)
         .collection('messages').reference().add(message.toJson());
+  }
+
+  void addUser(String uid, User user) {
+    DocumentReference reference = usersCollection.document(uid);
+    reference.setData(user.toJson());
+  }
+
+  void updateUser(User user) {
+    usersCollection.document(user.reference.documentID).updateData(user.toJson());
   }
 }

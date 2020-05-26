@@ -1,26 +1,37 @@
-import 'package:fdchat/chatMessagesList.dart';
-import 'package:fdchat/chatsList.dart';
-import 'package:fdchat/userProfile.dart';
+import 'package:fdchat/repository/dataRepository.dart';
+import 'package:fdchat/ui/mainPage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'mainPage.dart';
 import 'authorization/signUpPage.dart';
 
-void main() {
-  runApp(MyApp());
+final FirebaseAuth auth = FirebaseAuth.instance;
+final DataRepository dataRepository = DataRepository();
+String currentUserId;
+
+void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  Widget _defaultPage = (await _isAuthorized() ? MainPage() : SignUpPage());
+
+  runApp(MaterialApp(
+    title: 'Наш чат',
+    theme: ThemeData(
+      primarySwatch: Colors.blue,
+    ),
+    home: _defaultPage,
+    routes: <String, WidgetBuilder>{
+      '/ui': (BuildContext context) => new MainPage(),
+      '/authorization': (BuildContext context) => new SignUpPage()
+    },
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Наш чат',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: SignUpPage(),
-    );
-  }
-}
+Future<bool> _isAuthorized() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  currentUserId = prefs.getString('USER_ID') ?? "";
 
+  return currentUserId != "";
+}

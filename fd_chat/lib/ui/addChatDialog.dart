@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fdchat/repository/dataRepository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'models/user.dart';
+import '../main.dart';
+import '../models/user.dart';
 
 class AddChatDialogWidget extends StatefulWidget {
   String chatName;
@@ -14,7 +14,6 @@ class AddChatDialogWidget extends StatefulWidget {
 }
 
 class _AddChatDialogWidgetState extends State<AddChatDialogWidget> {
-  final DataRepository dataRepository = DataRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +46,8 @@ class _AddChatDialogWidgetState extends State<AddChatDialogWidget> {
     return SingleChildScrollView(
       padding: EdgeInsets.all(5),
       child: ListBody(
-          children: snapshot.map((data) => _buildListItem(context, data)).toList(),
+          children: snapshot.where((element) => element.documentID != currentUserId)
+              .map((data) => _buildListItem(context, data)).toList(),
       )
     );
   }
