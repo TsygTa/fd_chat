@@ -3,6 +3,8 @@ import 'package:fdchat/models/message.dart';
 import 'package:fdchat/models/user.dart';
 import 'dart:core';
 
+import 'package:flutter/material.dart';
+
 class Chat {
   String name;
   String lastMassege;
@@ -29,7 +31,7 @@ Chat _ChatFromJson(Map<String, dynamic> json) {
   return Chat(
       json['name'] as String,
       lastMassege: json['last_message'] as String,
-      messageTime: json['message_time'] == null ? null : (json['time'] as Timestamp).toDate(),
+      messageTime: json['message_time'] == null ? null : (json['message_time'] as Timestamp).toDate(),
       users: _convertUserReferences(json['users'] as List)
   );
 }
@@ -51,17 +53,4 @@ Map<String, dynamic> _ChatToJson(Chat instance) => <String, dynamic> {
   'message_time': instance.messageTime,
   'users': instance.users
 };
-
-//List<DocumentReference> _UsersReferencesList(List<DocumentReference> users) {
-//  if(users == null) {
-//    return null;
-//  }
-//  List<DocumentReference> usersMap = List<DocumentReference>();
-//
-//  users.forEach((user) {
-//    usersMap.add(user);
-//  });
-//
-//  return usersMap;
-//}
 

@@ -2,10 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
   String name;
+  String phone;
+  String email;
+  String status;
 
   DocumentReference reference;
 
-  User(this.name, {this.reference});
+  User(this.phone, {this.name, this.email, this.status, this.reference});
 
   factory User.fromSnapshot(DocumentSnapshot snapshot) {
     User user = User.fromJson(snapshot.data);
@@ -20,10 +23,18 @@ class User {
 
 User _UserFromJson(Map<String, dynamic> json) {
 
-  return User(json['name'] as String);
+  return User(
+      json['phone'] as String,
+      name: json['name'] as String ?? "",
+      email: json['email'] as String ?? "",
+      status: json['status'] as String ?? ""
+  );
 }
 
 Map<String, dynamic> _UserToJson(User instance) =>
     <String, dynamic> {
-      'name': instance.name
+      'phone': instance.phone,
+      'name': instance.name,
+      'email': instance.email,
+      'status': instance.status
     };
