@@ -1,9 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fdchat/models/message.dart';
-import 'package:fdchat/models/user.dart';
 import 'dart:core';
-
-import 'package:flutter/material.dart';
 
 class Chat {
   String name;
