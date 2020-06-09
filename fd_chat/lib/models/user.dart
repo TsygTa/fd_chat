@@ -5,10 +5,11 @@ class User {
   String phone;
   String email;
   String status;
+  String avatarReference;
 
   DocumentReference reference;
 
-  User(this.phone, {this.name, this.email, this.status, this.reference});
+  User(this.phone, {this.name, this.email, this.status, this.avatarReference, this.reference});
 
   factory User.fromSnapshot(DocumentSnapshot snapshot) {
     User user = User.fromJson(snapshot.data);
@@ -16,25 +17,27 @@ class User {
     return user;
   }
 
-  factory User.fromJson(Map<String, dynamic> json) => _UserFromJson(json);
+  factory User.fromJson(Map<String, dynamic> json) => _userFromJson(json);
 
-  Map<String, dynamic> toJson() => _UserToJson(this);
+  Map<String, dynamic> toJson() => _userToJson(this);
 }
 
-User _UserFromJson(Map<String, dynamic> json) {
+User _userFromJson(Map<String, dynamic> json) {
 
   return User(
       json['phone'] as String,
       name: json['name'] as String ?? "",
       email: json['email'] as String ?? "",
-      status: json['status'] as String ?? ""
+      status: json['status'] as String ?? "",
+      avatarReference: json['avatar'] as String ?? ""
   );
 }
 
-Map<String, dynamic> _UserToJson(User instance) =>
+Map<String, dynamic> _userToJson(User instance) =>
     <String, dynamic> {
       'phone': instance.phone,
       'name': instance.name,
       'email': instance.email,
-      'status': instance.status
+      'status': instance.status,
+      'avatar': instance.avatarReference
     };

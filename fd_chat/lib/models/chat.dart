@@ -18,12 +18,12 @@ class Chat {
     return chat;
   }
 
-  factory Chat.fromJson(Map<String, dynamic> json) => _ChatFromJson(json);
+  factory Chat.fromJson(Map<String, dynamic> json) => _chatFromJson(json);
 
-  Map<String, dynamic> toJson() => _ChatToJson(this);
+  Map<String, dynamic> toJson() => _chatToJson(this);
 }
 
-Chat _ChatFromJson(Map<String, dynamic> json) {
+Chat _chatFromJson(Map<String, dynamic> json) {
   return Chat(
       json['name'] as String,
       lastMassege: json['last_message'] as String,
@@ -43,7 +43,7 @@ List<DocumentReference> _convertUserReferences(List array) {
   return references;
 }
 
-Map<String, dynamic> _ChatToJson(Chat instance) => <String, dynamic> {
+Map<String, dynamic> _chatToJson(Chat instance) => <String, dynamic> {
   'name': instance.name,
   'last_message': instance.lastMassege,
   'message_time': instance.messageTime,

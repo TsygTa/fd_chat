@@ -1,9 +1,15 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fdchat/helpers.dart';
 import 'package:fdchat/models/user.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
+import 'package:http/http.dart' as http;
 
 import '../main.dart';
 
@@ -23,12 +29,14 @@ class _UserProfileState extends State<UserProfile> {
 
   User user;
   bool  _isSaveButtonDisabled;
-  File _image;
+  File _imageFile;
+  Uint8List _imageContent;
 
   _pickImageFromGallery() async {
     File image = await ImagePicker.pickImage(source: ImageSource.gallery, imageQuality: 50);
     setState(() {
-      _image = image;
+      _imageFile = image;
+      writeImageToLocal(_imageFile.readAsBytesSync());
     });
   }
 
@@ -40,13 +48,53 @@ class _UserProfileState extends State<UserProfile> {
         user = User.fromSnapshot(snapshot);
       });
     });
+
+    await readImageFromLocal().then((value) async{
+      setState(() {
+        _imageContent = value;
+      });
+    });
+
+    if(_imageContent == null || _imageContent.length == 0) {
+      await _downloadImage(user.avatarReference).then((value) {
+        if(value != null) {
+          writeImageToLocal(value);
+        }
+        _imageContent = value;
+      });
+    }
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+  Future<File> get _userProfileImageFile async {
+    final path = await _localPath;
+    return File('$path/user_profile_image');
+  }
+
+  Future<Uint8List> readImageFromLocal() async {
+    try {
+      final file = await _userProfileImageFile;
+      Uint8List contents = await file.readAsBytes();
+      return contents;
+    } catch (e) {
+      print('$e');
+      return null;
+    }
+  }
+
+  Future<File> writeImageToLocal(Uint8List content) async {
+    final file = await _userProfileImageFile;
+    return file.writeAsBytes(content);
   }
 
   @override
   void initState() {
     super.initState();
-    _isSaveButtonDisabled = true;
     _getData();
+    _isSaveButtonDisabled = true;
   }
 
   _setDisabled(bool value) {
@@ -91,12 +139,24 @@ class _UserProfileState extends State<UserProfile> {
           Row(
             children: <Widget>[
               Container(
-                padding: EdgeInsets.all(5.0),
-                width: 90,
-                height: 90,
-                child: _image != null ? Image.file(_image)
-                    : Icon(Icons.portrait, size: 90,),
+                margin: EdgeInsets.all(5.0),
+                decoration: BoxDecoration(border: Border.all(color: Colors.grey),
+                    color: Colors.white, borderRadius: BorderRadius.circular(20.0)),
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundImage: NetworkImage(user.avatarReference),
+                ),
               ),
+//              CircleAvatar(
+//                radius: 45,
+//                child: AspectRatio(
+//                  aspectRatio: 1/2,
+//                  child: _imageFile != null ? Image.file(_imageFile)
+//                      : (_imageContent != null && _imageContent.length > 0 ?
+//                  Image.memory(_imageContent)
+//                      : Icon(Icons.portrait, size: 90)),
+//                ),
+//              ),
               FlatButton(key: null,
                   onPressed: () {
                     _pickImageFromGallery();
@@ -175,7 +235,7 @@ class _UserProfileState extends State<UserProfile> {
               )
           ),
           FlatButton(key:null,
-              onPressed: _isSaveButtonDisabled ? null : _onSavePressed,
+              onPressed: _onSavePressed,//_isSaveButtonDisabled ? null : _onSavePressed,
               child: Text("Сохранить",
                   style: TextStyle(fontSize:16.0, color: Colors.blueAccent)
               )
@@ -184,13 +244,46 @@ class _UserProfileState extends State<UserProfile> {
     );
   }
 
-  _onSavePressed() {
+  _onSavePressed() async{
+    if(_imageFile != null) {
+      await _uploadImage().then((value) {
+        _saveUser(value);
+      });
+    } else {
+      _saveUser(null);
+    }
+  }
+
+  _saveUser(String avatar) {
     if (user != null) {
       user.status = statusTextFieldController.text;
       user.name = nameTextFieldController.text;
       user.email = emailTextFieldController.text;
+      user.avatarReference = avatar;
       dataRepository.updateUser(user);
       showToast("Профиль сохранен");
     }
+  }
+
+  Future<String> _uploadImage() async {
+
+    String fileName = user.reference.documentID;
+    StorageReference reference = firebaseStorage.ref().child("usersimages/avatars/$fileName");
+
+    StorageUploadTask uploadTask = reference.putFile(_imageFile);
+
+    StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
+    String location = await storageTaskSnapshot.ref.getDownloadURL();
+
+    return location;
+  }
+
+  Future<Uint8List> _downloadImage(String url) async {
+    if(url != null) {
+      final http.Response downloadData = await http.get(url);
+      final Uint8List fileContents = downloadData.bodyBytes;
+      return fileContents;
+    }
+    return null;
   }
 }
