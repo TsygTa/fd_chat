@@ -18,17 +18,22 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
   final dateFormat = DateFormat('hh:mm dd-MM-yyyy');
   final messageTextFieldController = TextEditingController();
   User user;
+  User messageUser;
 
-  Future<dynamic> _getUserProfile() async {
-    final DocumentReference document = dataRepository.getUser(currentUserId);
+  Future<dynamic> _getUserProfile(String userId) async {
+    final DocumentReference document = dataRepository.getUser(userId);
 
     await document.get().then<dynamic>(( DocumentSnapshot snapshot) async{
       setState(() {
-        user = User.fromSnapshot(snapshot);
+        if(userId == currentUserId) {
+          user = User.fromSnapshot(snapshot);
+        } else {
+          messageUser = User.fromSnapshot(snapshot);
+        }
       });
     });
-  }
 
+  }
   _clearTextInput() {
     messageTextFieldController.clear();
   }
@@ -36,7 +41,7 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
   @override
   void initState() {
     super.initState();
-    _getUserProfile();
+    _getUserProfile(currentUserId);
   }
   @override
   Widget build(BuildContext context) {
@@ -78,7 +83,7 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
                     controller: messageTextFieldController,
                     onSubmitted: (String value) {
                       DateTime now = DateTime.now();
-                      Message message = Message(value, userId: currentUserId, time: now, userName: user.name);
+                      Message message = Message(value, userId: currentUserId, time: now);
                       dataRepository.addMessageToChat(chatReference, message);
                       Chat chat = Chat(chatName, messageTime: now, lastMassege: value, reference: chatReference);
                       dataRepository.updateChat(chat);
@@ -104,6 +109,8 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
     if(message == null) {
       return Container();
     }
+
+    _getUserProfile(message.userId);
 
     if (message.userId == currentUserId) {
       return Align(
@@ -140,23 +147,35 @@ class _ChatMessagesListState extends State<ChatMessagesList> {
             margin: EdgeInsets.all(5.0),
             decoration: BoxDecoration(border: Border.all(color: Colors.grey),
                 color: Colors.white, borderRadius: BorderRadius.circular(12.0)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children:<Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(message.userName + ": ",  style: TextStyle(fontSize: 10)),
-                    Text(message.time == null ? ""
-                        : dateFormat.format(message.time), style: TextStyle(fontSize: 10)),
-            ]
+            child: Row (
+              children: <Widget> [
+                Container(
+                  margin: EdgeInsets.all(5.0),
+                  decoration: BoxDecoration(border: Border.all(color: Colors.grey),
+                      color: Colors.white, borderRadius: BorderRadius.circular(20.0)),
+                  child: messageUser != null && messageUser.avatarReference != null ? CircleAvatar(
+                    radius: 20,
+                    backgroundImage: NetworkImage(messageUser.avatarReference),
+                  ) : null,
                 ),
-                Text(message.text,  style: TextStyle(fontSize: 16)),
-              ]
-          ),
+                Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children:<Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(messageUser.name + ": ",  style: TextStyle(fontSize: 10)),
+                      Text(message.time == null ? ""
+                          : dateFormat.format(message.time), style: TextStyle(fontSize: 10)),
+                    ]
+                  ),
+                  Text(message.text,  style: TextStyle(fontSize: 16)),
+                ]
+                ),
+            ]),
           )
       );
     }

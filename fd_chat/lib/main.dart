@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fdchat/repository/dataRepository.dart';
 import 'package:fdchat/ui/mainPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/animation.dart';
@@ -11,6 +12,7 @@ import 'authorization/signUpPage.dart';
 
 final FirebaseAuth auth = FirebaseAuth.instance;
 final DataRepository dataRepository = DataRepository();
+final FirebaseStorage firebaseStorage = FirebaseStorage.instance;
 String currentUserId;
 
 Widget _defaultPage;
